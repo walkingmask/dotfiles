@@ -201,7 +201,7 @@ alias cp='nocorrect cp'
 alias man='nocorrect man'
 alias mkdir='nocorrect mkdir'
 alias mv='nocorrect mv'
-alias rm='nocorrect rm'
+# alias rm='nocorrect rm'
 alias sudo='nocorrect sudo'
 
 # setopt
