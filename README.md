@@ -20,3 +20,9 @@ cd ~/.dotfiles
 git commit -am "Update"
 git push
 ```
+
+
+## References
+
+* Inspired by [b4b4r07/dotfiles](https://github.com/b4b4r07/dotfiles)
+* Referenced [Code-Hex/dotfiles](https://github.com/Code-Hex/dotfiles)
