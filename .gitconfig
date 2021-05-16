@@ -1,22 +1,22 @@
 [core]
-  excludesfile = ~/.gitignore_global
-  editor = vim -c \"set fenc=utf-8\"
+    excludesfile = ~/.gitignore_global
+    editor = vim -c \"set fenc=utf-8\"
 
 [user]
-	name = walkingmask
-	email = walkingmask@gmail.com
+    name = walkingmask
+    email = walkingmask@gmail.com
 
 [color]
     ui = true
 
 [filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
 
 [github]
-	user = walkingmask
+    user = walkingmask
 
 [url "git@github.com:"]
     insteadOf = https://github.com/
