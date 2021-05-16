@@ -11,10 +11,10 @@ fi
 
 # clone walkingmask/dotfiles if not exists, and update
 if [ ! -d ${HOME}/.dotfiles ]; then
-  git clone https://github.com/walkingmask/dotfiles.git ${HOME}/.dotfiles
+  git clone  --recursive https://github.com/walkingmask/dotfiles.git ${HOME}/.dotfiles
 fi
 cd ${HOME}/.dotfiles
-git pull
+git pull --rebase false
 
 # Util function for installing dotfiles
 function alert () {
