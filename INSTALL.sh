@@ -98,7 +98,7 @@ else
 fi
 
 echo "Install ~/bin"
-:
+sh ${HERE}/src/install.sh
 echo "OK, ~/bin installed"
 
 echo "Finished installation, thank you"
