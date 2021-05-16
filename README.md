@@ -10,6 +10,11 @@ bash -c "$(curl https://raw.githubusercontent.com/walkingmask/dotfiles/master/IN
 
 ## Update
 
+Same as `Install`.
+
+
+## Update origin
+
 ```
 cd /path/to/dotfiles/
 git commit -am "Update"

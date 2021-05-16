@@ -1,55 +1,112 @@
-# for Mac OS X
-
-## zsh setting files
-# 1. global /etc/z*
-# 2. local ~/.z*
-## At login
-# 1. zshenv    Environment variable
-# 2. zprofile  exec only at login (PATH)
-# 3. zshrc     several settings
-# 4. zlogin    exec only at login
-## At interactive
-# 1. zshenv
-# 2. zshrc
-## At script
-# 1. zshenv
-## At logout
-# 1. zlogout   exec only at logout
-
-
-## locale
-
-export LC_ALL="en_US.UTF-8"
-export LANG="en_US.UTF-8"
-
-
-## plugin
-
-if type zplug-env > /dev/null 2>&1; then
-    zplug "zsh-users/zsh-syntax-highlighting"
-    zplug "zsh-users/zsh-completions"
-    # zplug "mollifier/anyframe"
-    zplug "b4b4r07/enhancd"
-    if ! zplug check --verbose; then
-        printf "Install? [y/N]: "
-        if read -q; then
-            echo; zplug install
-        fi
-    fi
-    # zplug load --verbose
-    zplug load
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zsh/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# zinit
+if [ ! -d ${ZDOTDIR}/.zinit ]; then
+  mkdir ${ZDOTDIR}/.zinit
+  command chmod g-rwX ${ZDOTDIR}/.zinit
+  git clone https://github.com/zdharma/zinit.git ${ZDOTDIR}/.zinit/bin
+fi
+source ${ZDOTDIR}/.zinit/bin/zinit.zsh
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+zinit light-mode for \
+  zinit-zsh/z-a-rust \
+  zinit-zsh/z-a-as-monitor \
+  zinit-zsh/z-a-patch-dl \
+  zinit-zsh/z-a-bin-gem-node
 
-## standard setopt
+# powerlevel10k
+if [ ! -e "$HOME/Library/Fonts/MesloLGS NF Regular.ttf" ]; then
+  curl -L 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf' >"$HOME/Library/Fonts/MesloLGS NF Regular.ttf"
+  curl -L 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf' >"$HOME/Library/Fonts/MesloLGS NF Bold.ttf"
+  curl -L 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf' >"$HOME/Library/Fonts/MesloLGS NF Italic.ttf"
+  curl -L 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf' >"$HOME/Library/Fonts/MesloLGS NF Bold Italic.ttf"
+  sleep 1
+  osascript -e 'tell application "Terminal" to set the font name of default settings to "MesloLGS NF"'
+fi
+zinit ice depth=1; zinit light romkatv/powerlevel10k
 
-setopt noautoremoveslash
-setopt no_beep
-setopt no_flow_control
+# fzf
+zinit ice lucid wait from'gh-r' as'program'
+zinit light junegunn/fzf
+zinit ice lucid wait
+zinit snippet 'https://github.com/junegunn/fzf/blob/master/shell/key-bindings.zsh'
+zinit ice lucid wait as'completion'
+zinit snippet 'https://raw.githubusercontent.com/b4b4r07/dotfiles/master/.zsh/Completion/_fzf'
+export FZF_DEFAULT_OPTS='--cycle --height 40% --reverse --border --prompt="(^_^) ❯ "'
 
+# asdf
+zinit ice lucid as'program' src'asdf.sh'
+zinit load asdf-vm/asdf
 
-## color setting
+# direnv
+zinit ice lucid from'gh-r' as'program' mv'direnv* -> direnv' \
+      atclone'./direnv hook zsh > zhook.zsh' atpull'%atclone' \
+      pick'direnv' src='zhook.zsh'
+zinit load direnv/direnv
+export DIRENV_LOG_FORMAT=
+export DIRENV_WARN_TIMEOUT=1h
 
+# History
+HISTFILE="${ZDOTDIR}/.zsh_history"
+HISTSIZE=10000
+SAVEHIST=1000000
+setopt extended_history
+setopt hist_ignore_all_dups
+setopt hist_ignore_dups
+setopt hist_ignore_space
+setopt hist_reduce_blanks
+setopt hist_save_no_dups
+setopt share_history
+
+# enable hooks
+autoload -Uz add-zsh-hook
+
+# keep awake while execution
+function __be_awake () {
+  sh -c 'caffeinate -u -t 86400 & echo $!' | read CAFFPID$$
+}
+function __be_ease () {
+  eval CAFFPID='$CAFFPID'$$
+  if [ "$CAFFPID" != "" ]; then
+    if pgrep -f caffeinate | grep $CAFFPID >/dev/null; then
+      kill $CAFFPID
+      eval CAFFPID"$$"=""
+    fi
+  fi
+}
+add-zsh-hook preexec __be_awake
+add-zsh-hook precmd __be_ease
+add-zsh-hook zshexit __be_ease
+
+# peep after execution
+function peeexec() {
+  if [ -e ${HOME}/bin/peep ]; then
+    (${HOME}/bin/peep &)
+  fi
+}
+add-zsh-hook precmd peeexec
+
+# cdr
+if [[ -n $(echo ${^fpath}/chpwd_recent_dirs(N)) && -n $(echo ${^fpath}/cdr(N)) ]]; then
+  autoload -Uz chpwd_recent_dirs cdr
+  add-zsh-hook chpwd chpwd_recent_dirs
+  zstyle ':chpwd:*' recent-dirs-max 100
+  zstyle ':chpwd:*' recent-dirs-default true
+  zstyle ':chpwd:*' recent-dirs-pushd true
+fi
+# change latest working directory on new shell
+if [ -f ${ZDOTDIR}/.chpwd-recent-dirs ]; then
+  cd $(head -1 ${ZDOTDIR}/.chpwd-recent-dirs | tr -d "$'")
+  [ -f ${PWD}/.envrc ] && (direnv reload &) || :
+fi
+
+# color setting
 autoload -Uz colors
 colors
 local DEFAULT=%{$reset_color%}
@@ -60,79 +117,46 @@ local BLUE=%{$fg[blue]%}
 local PURPLE=%{$fg[purple]%}
 local CYAN=%{$fg[cyan]%}
 local WHITE=%{$fg[white]%}
-
-### colorful ls
-
 export CLICOLOR=1
 export LSCOLORS=gxfxcxdxbxegedabagacag
 export LS_COLORS='di=36;40:ln=35;40:so=32;40:pi=33;40:ex=31;40:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;46'
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
-### colorful prompt
+# open editor
+function __edit () {
+  local editor
+  if [ -f "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" ]; then
+    editor="/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl"
+  elif [ -f "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" ]; then
+    editor="/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"
+  elif which vim >/dev/null; then
+    editor=vim
+  else
+    editor=cat
+  fi
+  $editor "$@"
+}
 
-case ${UID} in
-0)
-    PROMPT="%B%F{001}[('e')('e')('e')]#%f%b "
-    RPROMPT="%B%F{01}[%~]%f%b"
-    PROMPT2="%B%F{001}[('e')('e')('e')< %_]#%f%b "
-    RPROMPT2="%B%F{01}[%~]%f%b"
-    SPROMPT="%B%F{001}[('e')('e')('e')< %r is correct? [n,y,a,e]:%f%b "
-    [ -n "${REMOTEHOST}${SSH_CONNECTION}" ] && 
-        PROMPT="%F{001}${HOST%%.*} ${PROMPT}"
-    ;;
-*)
-    PROMPT="%F{220}[('e')]$%f "
-    RPROMPT="%F{220}[%~]%f"
-    PROMPT2="%F{220}[('e')< %_]$%f "
-    RPROMPT2="%F{220}[%~]%f"
-    SPROMPT="%F{220}[('e')< %r is correct? [n,y,a,e]:%f "
-    [ -n "${REMOTEHOST}${SSH_CONNECTION}" ] && 
-        PROMPT="%F{220}$(echo ${HOST%%.*} | tr '[a-z]' '[A-Z]') ${PROMPT}"
-    ;;
-esac
-
-
-## terminal title
-
-echo -en "\033];${USER}@${HOST%%.*}\007"
-
-
-## cd setting
-
-DIRSTACKSIZE=100
-setopt auto_cd
-setopt auto_pushd
-
-
-## correction
-
-setopt correct
-SPROMPT="correct: $RED%R$DEFAULT -> $GREEN%r$DEFAULT ? [No/Yes/Abort/Edit]"
-
-
-## aliases
-
-alias rm="mv_trash"      # chenge "rm" to "/Users/$USER/bin/mv_trash"
+# aliases
 alias ls="ls -G"
-alias lv="ls -alhF"
 alias du="du -h"
 alias df="df -h"
 alias su="su -l"
 alias rsync="rsync -avhzu --progress"
 alias where="command -v"
-alias j="jobs -l"
-alias brew="env PATH=${PATH/\/Users\/$USER\/.anyenv\/envs\/*env\/shims:/} brew"
+alias cfc="ps aux | grep caff | grep -v grep"
+alias cfk="pkill caffeinate"
 alias subl="/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl"
 alias code="/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code"
-alias octave="/usr/local/octave/3.8.0/bin/octave-3.8.0"
-alias ipcheck="curl ipinfo.io/ip"
+alias ip="curl ipinfo.io/ip"
+alias ip_lookup="echo 192.168.0.{1..254} | xargs -P256 -n1 ping -s1 -c1 -W1 | grep ttl"
 alias ssh-config="cat $HOME/.ssh/config"
 alias a2n="/usr/bin/python -c \"import sys;v=sys.argv;print ''.join(['%02d'%(ord(c)-96) for c in v[1].lower()]) if len(v)>1 else ''\""
 alias mabiki="/usr/bin/python -c \"import sys;v=sys.argv;print ''.join([c for i,c in enumerate(v[1]) if not i%2]) if len(v)>1 else ''\""
 alias uneri="/usr/bin/python -c \"import sys;v=sys.argv;print ''.join([c.upper() if i%2 else c.lower() for i,c in enumerate(v[1])]) if len(v)>1 else ''\""
-
-### git
-
+# override rm if can
+command -v mv_trash &> /dev/null && alias rm="mv_trash" || :
+# git
 alias gsta='git status'
 alias glog='git log'
 alias gbra='git branch'
@@ -141,50 +165,15 @@ alias gadd='git add'
 alias gcom='git commit'
 alias gpush='git push'
 alias gpull='git pull'
-alias gstash='PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin git stash'
-alias grevert='PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin git revert'
-
-### caffeine check and kill
-
-alias cfc="ps aux | grep caff | grep -v grep"
-alias cfk="pkill caffeinate"
-
-### translate
-
-alias ja2en="trans -b {ja=en}"
-alias j2e="ja2en"
-alias en2ja="trans -b {en=ja}"
-alias e2j="en2ja"
-
-### weather
-
-alias weather="curl 'wttr.in/那覇?0'"
-
-### wakeonlan tens
-
-alias wolt="wakeonlan -i walkingmask.orz.hm bc:5f:f4:88:f6:0b"
-alias woltl="wakeonlan bc:5f:f4:88:f6:0b"
-alias ipynb2py="jupyter nbconvert --to script"
-
-### look up ip in lan
-
-alias ip_lookup="echo 192.168.0.{1..254} | xargs -P256 -n1 ping -s1 -c1 -W1 | grep ttl"
-
-### notes and papers
-
-alias research="$HOME/bin/notes research"
-alias papers="open -g $HOME/dev/papers && open -na 'Google Chrome' --args --new-window https://github.com/walkingmask/papers/issues"
-
-
 ## alias -s
-
-### http://itchyny.hatenablog.com/entry/20130227/1361933011
-alias -s py=python
-alias -s pl=perl
-alias -s sh=sh
+alias -s py="/usr/bin/env python"
+alias -s pl="/usr/bin/env perl"
+alias -s sh="/usr/bin/env bash"
 alias -s go="go run"
 alias -s {png,jpg,bmp,PNG,JPG,BMP}=open
-alias -s html=subl
+alias -s html=__edit
+alias -s txt=__edit
+alias -s md=__edit
 function extract() {
   case $1 in
     *.tar.gz|*.tgz) tar xzvf $1;;
@@ -201,140 +190,58 @@ function extract() {
   esac
 }
 alias -s {gz,tgz,zip,lzh,bz2,tbz,Z,tar,arj,xz}=extract
-# function runcpp () { g++ $1 && shift && ./a.out $@ }
-# alias -s {c,cpp}=runcpp
 
+# correction
+setopt correct
+setopt correct_all
+CORRECT_IGNORE='_*'
+CORRECT_IGNORE_FILE='.*'
+SPROMPT="correct: $RED%R$DEFAULT -> $GREEN%r$DEFAULT ? [No/Yes/Abort/Edit]"
+alias cp='nocorrect cp'
+alias man='nocorrect man'
+alias mkdir='nocorrect mkdir'
+alias mv='nocorrect mv'
+alias rm='nocorrect rm'
+alias sudo='nocorrect sudo'
 
-## command history configuration
-
-HISTFILE=${HOME}/.zsh_history
-HISTSIZE=1000
-SAVEHIST=100000
-setopt hist_expand
-setopt hist_ignore_all_dups
-setopt hist_ignore_dups
-setopt hist_ignore_space
-setopt hist_reduce_blanks
-setopt hist_save_no_dups
-setopt share_history
-
-### historical backward/forward search with linehead string binded to ^P/^N
-
-autoload -Uz history-search-end
-zle -N history-beginning-search-backward-end history-search-end
-zle -N history-beginning-search-forward-end history-search-end
-bindkey "^P" history-beginning-search-backward-end
-bindkey "^N" history-beginning-search-forward-end 
-
-### reverse menu completion binded to Shift-Tab
-
-bindkey "\e[Z" reverse-menu-complete
-
-### incremental history search
-
-setopt inc_append_history
-bindkey "^R" history-incremental-search-backward
-bindkey "^S" history-incremental-search-forward
-
-
-## completion configuration
-
-autoload -U compinit
-compinit
-
-### setopt
-
-setopt always_last_prompt
-setopt auto_menu
-setopt auto_param_keys
-setopt auto_param_slash
-setopt complete_aliases
-setopt complete_in_word
-setopt extended_glob
-setopt globdots
+# setopt
+setopt auto_cd
+setopt no_auto_remove_slash
 setopt interactive_comments
-setopt list_packed
-setopt list_types
-setopt magic_equal_subst
-setopt mark_dirs
-setopt print_eight_bit
+setopt rm_star_silent
+setopt ignore_eof
+setopt no_flow_control
 
-### zstyle
-
-zstyle ':completion:*:default' menu select=2
-zstyle ':completion:*' verbose yes
-zstyle ':completion:*' completer _expand _complete _match _prefix _approximate _list _history
-zstyle ':completion:*:messages' format $YELLOW'%d'$DEFAULT
-zstyle ':completion:*:warnings' format $RED'No matches for:'$YELLOW' %d'$DEFAULT
-zstyle ':completion:*:descriptions' format $YELLOW'completing %B%d%b'$DEFAULT
-zstyle ':completion:*:corrections' format $YELLOW'%B%d '$RED'(errors: %e)%b'$DEFAULT
-zstyle ':completion:*:options' description 'yes'
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' # match to uppercase when lowercase
-zstyle ':completion:*' group-name ''
-bindkey "^I" menu-complete
-
-
-## hook functions
-
-autoload -Uz add-zsh-hook
-
-### keep awake while execution
-
-function be_awake() {
-    sh -c 'caffeinate -u -t 86400 & echo $!' | read CAFFPID$$
+# For Python
+export PYTHONSTARTUP=${HOME}/.pythonstartup
+# TODO: these snippets not working, why?
+# zinit ice wait lucid as'completion' if'command -v pip &> /dev/null' id-as'pip-completion-zsh' atclone'pip completion --zsh >_pip' atpull"%atclone"
+# zinit load zdharma/null
+zinit ice lucid wait as'completion'
+zinit snippet 'https://raw.githubusercontent.com/srijanshetty/zsh-pip-completion/master/_pip'
+function __pip () {
+  pip "$@"
+  if [ $# -gt 0 ] && [ "$1" = "install" ]; then
+    asdf reshim python
+  fi
 }
-function be_ease() {
-    eval CAFFPID='$CAFFPID'$$
-    if [ "$CAFFPID" != "" ]; then
-        if pgrep -f caffeinate | grep $CAFFPID >/dev/null; then
-            kill $CAFFPID
-            eval CAFFPID"$$"=""
-        fi
-    fi
+alias pip='__pip'
+function __venv () {
+  [ ! "$VIRTUAL_ENV" ] && echo "layout python" >>${PWD}/.envrc && direnv allow || :
 }
-function goodnight() {
-    be_ease
-}
-add-zsh-hook preexec be_awake
-add-zsh-hook precmd be_ease
-add-zsh-hook zshexit goodnight
+alias venv='__venv'
 
-### peep!
+# completion, highlights, suggestions
+zinit lucid has'docker' as'completion' is-snippet for \
+  'https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker' \
+  'https://github.com/docker/compose/blob/master/contrib/completion/zsh/_docker-compose'
+zinit ice wait'1a' lucid atpull'zinit creinstall -q .' atload'ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay' blockf
+zinit light zsh-users/zsh-completions
+zinit ice wait'1b' lucid blockf
+zinit light Aloxaf/fzf-tab
+zinit wait'1c' lucid light-mode for \
+  zdharma/fast-syntax-highlighting \
+  atload"_zsh_autosuggest_start" zsh-users/zsh-autosuggestions
 
-function peeexec() {
-    if [ -e $HOME/bin/peep ]; then
-        ($HOME/bin/peep &)
-    fi
-}
-add-zsh-hook precmd peeexec
-
-
-## directory memory
-
-### remember the last changed directory's PATH
-
-function remeberpath() {
-    echo $PWD >$HOME/.zcd
-}
-add-zsh-hook zshexit remeberpath
-
-### go back to the previous working directory
-
-[ -f $HOME/.zcd ] && cd `cat $HOME/.zcd`
-
-
-## load experimental zsh configuration file
-
-[ -f ${HOME}/.zshrc.mine ] && source ${HOME}/.zshrc.mine
-[ -f ${HOME}/.zshrc.peco ] && source ${HOME}/.zshrc.peco
-
-
-## For Python
-
-export PYTHONSTARTUP=~/.pythonstartup
-
-
-## zmv http://mollifier.hatenablog.com/entry/20101227/p1
-
-autoload -Uz zmv
-alias zmv='noglob zmv -W'
+# To customize prompt, run `p10k configure` or edit ~/.zsh/.p10k.zsh.
+[[ ! -f ${HOME}/.zsh/.p10k.zsh ]] || source ${HOME}/.zsh/.p10k.zsh
