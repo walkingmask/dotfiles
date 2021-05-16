@@ -45,7 +45,13 @@ function install_dotfile () {
 
 echo "Install dotfiles ..."
 ###################################################  DOTFILES SECTION  #########
+install_dotfile .bash_profile $HOME
+install_dotfile .bashrc $HOME
 install_dotfile .config/notes/config.sh $HOME
+install_dotfile .gitconfig $HOME
+install_dotfile .gitignore_global $HOME
+install_dotfile .pythonstartup $HOME
+install_dotfile .tool-versions $HOME
 install_dotfile .zsh/.p10k.zsh $HOME
 install_dotfile .zsh/.zprofile $HOME
 # install_dotfile .zsh/.zshenv $HOME
@@ -55,11 +61,6 @@ if [ -e ${HOME}/.zshenv -a ! -L ${HOME}/.zshenv ]; then
  fi
 ln -sfv ${HERE%/}/.zsh/.zshenv ${HOME}/.zshenv
 install_dotfile .zsh/.zshrc $HOME
-install_dotfile .bashrc $HOME
-install_dotfile .gitconfig $HOME
-install_dotfile .gitignore_global $HOME
-install_dotfile .pythonstartup $HOME
-install_dotfile .tool-versions $HOME
 ################################################################################
 alert "If some file backed up and you don't need it, delete it yourself"
 echo "OK, dotfiles installed"
