@@ -1,0 +1,24 @@
+if which peco >/dev/null; then
+  # ghq
+  if which ghq >/dev/null; then
+    function peco-ghq() {
+      local src=$(ghq list --full-path | peco --query "$LBUFFER")
+      if [ -n "$src" ]; then
+        BUFFER="cd $src"
+        zle accept-line
+      fi
+      zle -R -c
+    }
+    zle -N peco-ghq
+    bindkey '^]' peco-ghq
+  fi
+
+  # history
+  function exec_peco_history() {
+    BUFFER=$(history -n 1 | tail -r | awk '!a[$0]++' | peco)
+    CURSOR=$#BUFFER
+    zle reset-prompt
+  }
+  zle -N exec_peco_history
+  bindkey '^r' exec_peco_history
+fi
