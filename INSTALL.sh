@@ -9,6 +9,10 @@ if [[ ! "$OSTYPE" =~ ^darwin ]]; then
   exit 1
 fi
 
+# clone walkingmask/dotfiles
+git clone https://github.com/walkingmask/dotfiles.git ${HOME}/.dotfiles
+cd ${HOME}/.dotfiles
+
 # Util function for installing dotfiles
 function alert () {
   echo -e "\033[1;31m${1}\033[0m"

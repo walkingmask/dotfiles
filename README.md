@@ -16,7 +16,7 @@ Same as `Install`.
 ## Update origin
 
 ```
-cd /path/to/dotfiles/
+cd ~/.dotfiles
 git commit -am "Update"
 git push
 ```
