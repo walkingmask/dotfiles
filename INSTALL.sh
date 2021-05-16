@@ -14,7 +14,7 @@ if [ ! -d ${HOME}/.dotfiles ]; then
   git clone  --recursive https://github.com/walkingmask/dotfiles.git ${HOME}/.dotfiles
 fi
 cd ${HOME}/.dotfiles
-git pull --rebase false
+git pull --rebase
 
 # Util function for installing dotfiles
 function alert () {
