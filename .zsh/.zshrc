@@ -6,22 +6,22 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # zinit
-if [ ! -d ${ZDOTDIR}/.zinit ]; then
-  mkdir ${ZDOTDIR}/.zinit
-  command chmod g-rwX ${ZDOTDIR}/.zinit
-  git clone https://github.com/zdharma/zinit.git ${ZDOTDIR}/.zinit/bin
+ZINIT_HOME="${ZDOTDIR}/.zinit"
+if [ ! -d $ZINIT_HOME ]; then
+  mkdir $ZINIT_HOME
+  git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 fi
-source ${ZDOTDIR}/.zinit/bin/zinit.zsh
+source "${ZINIT_HOME}/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 zinit light-mode for \
-  zinit-zsh/z-a-rust \
-  zinit-zsh/z-a-as-monitor \
-  zinit-zsh/z-a-patch-dl \
-  zinit-zsh/z-a-bin-gem-node
+  zdharma-continuum/z-a-rust \
+  zdharma-continuum/z-a-as-monitor \
+  zdharma-continuum/z-a-patch-dl \
+  zdharma-continuum/z-a-bin-gem-node
 
 # powerlevel10k
-if [ ! -e "$HOME/Library/Fonts/MesloLGS NF Regular.ttf" ]; then
+if command -v osascript &> /dev/null && [ ! -e "$HOME/Library/Fonts/MesloLGS NF Regular.ttf" ]; then
   curl -L 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf' >"$HOME/Library/Fonts/MesloLGS NF Regular.ttf"
   curl -L 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf' >"$HOME/Library/Fonts/MesloLGS NF Bold.ttf"
   curl -L 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf' >"$HOME/Library/Fonts/MesloLGS NF Italic.ttf"
@@ -68,29 +68,31 @@ setopt share_history
 autoload -Uz add-zsh-hook
 
 # keep awake while execution
-function __be_awake () {
-  sh -c 'caffeinate -u -t 86400 & echo $!' | read CAFFPID$$
-}
-function __be_ease () {
-  eval CAFFPID='$CAFFPID'$$
-  if [ "$CAFFPID" != "" ]; then
-    if pgrep -f caffeinate | grep $CAFFPID >/dev/null; then
-      kill $CAFFPID
-      eval CAFFPID"$$"=""
+if command -v caffeinate &> /dev/null; then
+  function __be_awake () {
+    sh -c 'caffeinate -u -t 86400 & echo $!' | read CAFFPID$$
+  }
+  function __be_ease () {
+    eval CAFFPID='$CAFFPID'$$
+    if [ "$CAFFPID" != "" ]; then
+      if pgrep -f caffeinate | grep $CAFFPID >/dev/null; then
+        kill $CAFFPID
+        eval CAFFPID"$$"=""
+      fi
     fi
-  fi
-}
-add-zsh-hook preexec __be_awake
-add-zsh-hook precmd __be_ease
-add-zsh-hook zshexit __be_ease
+  }
+  add-zsh-hook preexec __be_awake
+  add-zsh-hook precmd __be_ease
+  add-zsh-hook zshexit __be_ease
+fi
 
 # peep after execution
-function peeexec() {
-  if [ -e ${HOME}/bin/peep ]; then
+if [ -e ${HOME}/bin/peep ]; then
+  function peeexec() {
     (${HOME}/bin/peep &)
-  fi
-}
-add-zsh-hook precmd peeexec
+  }
+  add-zsh-hook precmd peeexec
+fi
 
 # cdr
 if [[ -n $(echo ${^fpath}/chpwd_recent_dirs(N)) && -n $(echo ${^fpath}/cdr(N)) ]]; then
@@ -122,38 +124,13 @@ export LSCOLORS=gxfxcxdxbxegedabagacag
 export LS_COLORS='di=36;40:ln=35;40:so=32;40:pi=33;40:ex=31;40:bd=34;46:cd=34;43:su=30;41:sg=30;46:tw=30;42:ow=30;46'
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
-# open editor
-function __edit () {
-  local editor
-  if [ -f "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" ]; then
-    editor="/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl"
-  elif [ -f "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" ]; then
-    editor="/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"
-  elif which vim >/dev/null; then
-    editor=vim
-  else
-    editor=cat
-  fi
-  $editor "$@"
-}
-
 # aliases
-alias ls="ls -G"
-alias du="du -h"
-alias df="df -h"
-alias su="su -l"
-alias rsync="rsync -avhzu --progress"
-alias where="command -v"
-alias cfc="ps aux | grep caff | grep -v grep"
-alias cfk="pkill caffeinate"
-alias subl="/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl"
-alias code="/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code"
-alias ip="curl ipinfo.io/ip"
-alias ip_lookup="echo 192.168.0.{1..254} | xargs -P256 -n1 ping -s1 -c1 -W1 | grep ttl"
+alias brew='PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin brew'
+alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
+command -v code &> /dev/null && : || alias code='/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code'
+alias ip='curl ipinfo.io/ip'
+alias ip_lookup='echo 192.168.0.{1..254} | xargs -P256 -n1 ping -s1 -c1 -W1 | grep ttl'
 alias ssh-config="cat $HOME/.ssh/config"
-alias a2n="/usr/bin/python -c \"import sys;v=sys.argv;print ''.join(['%02d'%(ord(c)-96) for c in v[1].lower()]) if len(v)>1 else ''\""
-alias mabiki="/usr/bin/python -c \"import sys;v=sys.argv;print ''.join([c for i,c in enumerate(v[1]) if not i%2]) if len(v)>1 else ''\""
-alias uneri="/usr/bin/python -c \"import sys;v=sys.argv;print ''.join([c.upper() if i%2 else c.lower() for i,c in enumerate(v[1])]) if len(v)>1 else ''\""
 # override rm if can
 command -v mv_trash &> /dev/null && alias rm="mv_trash" || :
 # git
@@ -165,31 +142,6 @@ alias gadd='git add'
 alias gcom='git commit'
 alias gpush='git push'
 alias gpull='git pull'
-## alias -s
-alias -s py="/usr/bin/env python"
-alias -s pl="/usr/bin/env perl"
-alias -s sh="/usr/bin/env bash"
-alias -s go="go run"
-alias -s {png,jpg,bmp,PNG,JPG,BMP}=open
-alias -s html=__edit
-alias -s txt=__edit
-alias -s md=__edit
-function extract() {
-  case $1 in
-    *.tar.gz|*.tgz) tar xzvf $1;;
-    *.tar.xz) tar Jxvf $1;;
-    *.zip) unzip $1;;
-    *.lzh) lha e $1;;
-    *.tar.bz2|*.tbz) tar xjvf $1;;
-    *.tar.Z) tar zxvf $1;;
-    *.gz) gzip -d $1;;
-    *.bz2) bzip2 -dc $1;;
-    *.Z) uncompress $1;;
-    *.tar) tar xvf $1;;
-    *.arj) unarj $1;;
-  esac
-}
-alias -s {gz,tgz,zip,lzh,bz2,tbz,Z,tar,arj,xz}=extract
 
 # correction
 setopt correct

@@ -1,6 +1,22 @@
 # dotfiles
 
 
+## Pre-install
+
+macOS
+
+```
+xcode-select --install
+# https://brew.sh/
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+Ubuntu 20.04
+
+```
+```
+
+
 ## Install
 
 ```
