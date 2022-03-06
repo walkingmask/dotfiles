@@ -11,9 +11,19 @@ xcode-select --install
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-Ubuntu 20.04
+WSL2
 
 ```
+# Install fonts
+https://github.com/romkatv/powerlevel10k#manual-font-installation
+https://qiita.com/peachft/items/0d8161102e2b07248467#フォントの変更
+sudo apt-get install build-essential curl file git
+# https://brew.sh/
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /home/${USER}/.profile
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+which zsh | sudo tee -a /etc/shells
+chsh -s `which zsh`
 ```
 
 
@@ -26,13 +36,15 @@ bash -c "$(curl https://raw.githubusercontent.com/walkingmask/dotfiles/master/IN
 
 ## Update
 
-Same as `Install`.
+```
+cd ${HOME}/.dotfiles && git pull --rebase
+```
 
 
 ## Update origin
 
 ```
-cd ~/.dotfiles
+cd ${HOME}/.dotfiles
 git commit -am "Update"
 git push
 ```

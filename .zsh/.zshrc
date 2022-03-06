@@ -125,12 +125,11 @@ export LS_COLORS='di=36;40:ln=35;40:so=32;40:pi=33;40:ex=31;40:bd=34;46:cd=34;43
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
 # aliases
-alias brew='PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin brew'
-alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl'
-command -v code &> /dev/null && : || alias code='/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code'
+[[ "$OSTYPE" == "darwin"* ]] && alias brew='PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin brew' || :
+[ -e '/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl' ] && alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl' || :
+[ -e '/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code' ] && alias code='/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code' || :
 alias ip='curl ipinfo.io/ip'
 alias ip_lookup='echo 192.168.0.{1..254} | xargs -P256 -n1 ping -s1 -c1 -W1 | grep ttl'
-alias ssh-config="cat $HOME/.ssh/config"
 # override rm if can
 command -v mv_trash &> /dev/null && alias rm="mv_trash" || :
 # git

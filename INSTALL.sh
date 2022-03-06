@@ -1,20 +1,16 @@
 #!/usr/bin/env bash
 set -eu
 
-echo "Hello, ${USER}"
+# const var
 
-# clone walkingmask/dotfiles if not exists, and update
-if [ ! -d ${HOME}/.dotfiles ]; then
-  git clone  --recursive https://github.com/walkingmask/dotfiles.git ${HOME}/.dotfiles
-fi
-cd ${HOME}/.dotfiles
-git pull --rebase
+HERE=$(cd $(dirname $0); pwd)
 
 # Util function for installing dotfiles
+
 function alert () {
   echo -e "\033[1;31m${1}\033[0m"
 }
-HERE=$(cd $(dirname $0); pwd)
+
 function install_dotfile () {
   #
   # install_dotfile .bashrc $HOME
@@ -37,8 +33,19 @@ function install_dotfile () {
   ln -sfnv $dist $target
 }
 
-echo "Install dotfiles ..."
+# start
+
+echo "Hello, ${USER}"
+
+# clone walkingmask/dotfiles if not exists
+if [ ! -d ${HOME}/.dotfiles ]; then
+  git clone  --recursive https://github.com/walkingmask/dotfiles.git ${HOME}/.dotfiles
+fi
+
+cd ${HOME}/.dotfiles
+
 ###################################################  DOTFILES SECTION  #########
+echo "Install dotfiles ..."
 install_dotfile .bash_profile $HOME
 install_dotfile .bashrc $HOME
 install_dotfile .gitconfig $HOME
@@ -53,9 +60,9 @@ if [ -e ${HOME}/.zshenv -a ! -L ${HOME}/.zshenv ]; then
  fi
 ln -sfv ${HERE%/}/.zsh/.zshenv ${HOME}/.zshenv
 install_dotfile .zsh/.zshrc $HOME
-################################################################################
 alert "If some file backed up and you don't need it, delete it yourself"
 echo "OK, dotfiles installed"
+################################################################################
 
 echo "Finished installation, thank you"
 exit 0
