@@ -14,6 +14,9 @@ xcode-select --install
 WSL2
 
 ```
+
+# ** Setup ~/.ssh before doing everything else **
+
 # Install fonts
 https://github.com/romkatv/powerlevel10k#manual-font-installation
 https://qiita.com/peachft/items/0d8161102e2b07248467#フォントの変更
