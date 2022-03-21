@@ -126,8 +126,8 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
 # aliases
 [[ "$OSTYPE" == "darwin"* ]] && alias brew='PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin brew' || :
-[ -e '/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl' ] && alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl' || :
-[ -e '/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code' ] && alias code='/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code' || :
+[ -e '/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl' ] && alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl' || :
+[ -e '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' ] && alias code='/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code' || :
 alias ip='curl ipinfo.io/ip'
 alias ip_lookup='echo 192.168.0.{1..254} | xargs -P256 -n1 ping -s1 -c1 -W1 | grep ttl'
 # override rm if can
