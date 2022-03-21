@@ -194,5 +194,16 @@ zinit wait'1c' lucid light-mode for \
   zdharma/fast-syntax-highlighting \
   atload"_zsh_autosuggest_start" zsh-users/zsh-autosuggestions
 
+# WSL ssh-agent
+if [ $(uname -r | sed -n 's/.*\( *Microsoft *\).*/\1/ip') ]; then
+  if [ -z "$(pgrep ssh-agent)" ]; then
+      rm -rf /tmp/ssh-*
+      eval $(ssh-agent -s) > /dev/null
+  else
+      export SSH_AGENT_PID=$(pgrep ssh-agent)
+      export SSH_AUTH_SOCK=$(find /tmp/ssh-* -name "agent.*")
+  fi
+fi
+
 # To customize prompt, run `p10k configure` or edit ~/.zsh/.p10k.zsh.
 [[ ! -f ${HOME}/.zsh/.p10k.zsh ]] || source ${HOME}/.zsh/.p10k.zsh
