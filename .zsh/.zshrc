@@ -125,7 +125,7 @@ export LS_COLORS='di=36;40:ln=35;40:so=32;40:pi=33;40:ex=31;40:bd=34;46:cd=34;43
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
 # aliases
-[[ "$OSTYPE" == "darwin"* ]] && alias brew='PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin brew' || :
+[[ "$OSTYPE" == "darwin"* ]] && [ -e '/usr/local/bin/brew' ] && alias brew='PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin brew' || :
 [ -e '/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl' ] && alias subl='/Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl' || :
 [ -e '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' ] && alias code='/Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin/code' || :
 alias ip='curl ipinfo.io/ip'
