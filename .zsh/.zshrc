@@ -167,7 +167,6 @@ setopt ignore_eof
 setopt no_flow_control
 
 # For Python
-export PYTHONSTARTUP=${HOME}/.pythonstartup
 # TODO: these snippets not working, why?
 # zinit ice wait lucid as'completion' if'command -v pip &> /dev/null' id-as'pip-completion-zsh' atclone'pip completion --zsh >_pip' atpull"%atclone"
 # zinit load zdharma/null

@@ -49,7 +49,6 @@ install_dotfile .bash_profile $HOME
 install_dotfile .bashrc $HOME
 install_dotfile .gitconfig $HOME
 install_dotfile .gitignore_global $HOME
-install_dotfile .pythonstartup $HOME
 install_dotfile .zsh/.p10k.zsh $HOME
 install_dotfile .zsh/.zprofile $HOME
 # install_dotfile .zsh/.zshenv $HOME
