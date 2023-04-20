@@ -141,6 +141,9 @@ alias gadd='git add'
 alias gcom='git commit'
 alias gpush='git push'
 alias gpull='git pull'
+# docker
+alias d='docker'
+alias dc='docker-compose'
 
 # correction
 setopt correct
